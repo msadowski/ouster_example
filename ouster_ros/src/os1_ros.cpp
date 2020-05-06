@@ -32,7 +32,16 @@ sensor_msgs::Imu packet_to_imu_msg(const PacketMsg& p,
 
     //TODO: REMOVE TIME OFFSET
     uint64_t offset = 86400 * 1e9;
-    m.header.stamp.fromNSec(imu_gyro_ts(buf)-offset);
+    uint64_t ouster_time = imu_gyro_ts(buf);
+    if (ouster_time > offset)
+    {
+        //assume GPS
+        m.header.stamp.fromNSec(ouster_time - offset);
+    }
+    else
+    {
+        m.header.stamp.fromNSec(ouster_time);
+    }
     m.header.frame_id = frame;
 
     m.orientation.x = 0;
@@ -68,7 +77,16 @@ sensor_msgs::PointCloud2 cloud_to_cloud_msg(const CloudOS1& cloud, ns timestamp,
     msg.header.frame_id = frame;
     // TODO: REMOVE OFFSET
     uint64_t offset = 86400 * 1e9;
-    msg.header.stamp.fromNSec(timestamp.count()-offset);
+    uint64_t ouster_time = timestamp.count();
+    if (ouster_time > offset)
+    {
+        //assume GPS
+        msg.header.stamp.fromNSec(ouster_time - offset);
+    }
+    else
+    {
+        msg.header.stamp.fromNSec(ouster_time);
+    }
     return msg;
 }
 
